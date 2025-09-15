@@ -19,25 +19,23 @@ class LandingPage extends ConsumerWidget {
 
     return Scaffold(
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: EdgeInsets.all(isMobile ? 24 : 48),
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 500),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 500),
+            child: SingleChildScrollView(
+              padding: EdgeInsets.all(isMobile ? 24 : 48),
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  const SizedBox(height: 40),
-
                   // App Logo/Title
                   Column(
                     children: [
                       const GradientIconContainer(
                         icon: Icons.games,
-                        size: 80,
-                        iconSize: 40,
+                        size: 60,
+                        iconSize: 30,
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 12),
                       Text(
                         'Game Tinder',
                         style: Theme.of(context).textTheme.headlineMedium
@@ -46,45 +44,34 @@ class LandingPage extends ConsumerWidget {
                               color: Theme.of(context).colorScheme.primary,
                             ),
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 4),
                       Text(
-                        'Find your next gaming session',
-                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        'Connect with friends, discover mutual games, and find your next gaming session.',
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: Colors.grey[600],
                         ),
                       ),
                     ],
                   ),
 
-                  const SizedBox(height: 48),
-
-                  // Welcome Card
-                  AppCard(
-                    child: SectionHeader(
-                      title: 'Welcome to Game Tinder!',
-                      subtitle:
-                          'Connect with friends, discover mutual games, and find your next gaming session.',
-                      icon: Icons.group_add,
-                    ),
-                  ),
-
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 24),
 
                   // User Setup Form
                   _buildUserForm(context, formState, formNotifier),
 
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 12),
 
                   // Error Message
                   if (formState.errorMessage != null)
                     ErrorMessage(message: formState.errorMessage!),
 
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 12),
 
                   // Create User Button
                   _buildCreateButton(context, ref, formState, formNotifier),
 
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 12),
 
                   // Demo Button
                   _buildDemoButton(context, ref, formNotifier),
@@ -94,29 +81,6 @@ class LandingPage extends ConsumerWidget {
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildHeader(BuildContext context) {
-    return Column(
-      children: [
-        const GradientIconContainer(icon: Icons.games, size: 80, iconSize: 40),
-        const SizedBox(height: 16),
-        Text(
-          'Game Tinder',
-          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: Theme.of(context).colorScheme.primary,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          'Find games your friends want to play',
-          style: Theme.of(
-            context,
-          ).textTheme.bodyLarge?.copyWith(color: Colors.grey[600]),
-        ),
-      ],
     );
   }
 
@@ -135,7 +99,7 @@ class LandingPage extends ConsumerWidget {
               context,
             ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 12),
 
           // Display Name
           AppFormField(
@@ -152,7 +116,7 @@ class LandingPage extends ConsumerWidget {
             },
           ),
 
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
 
           // Steam Integration Toggle
           SwitchListTile(
@@ -164,7 +128,7 @@ class LandingPage extends ConsumerWidget {
           ),
 
           if (formState.useSteamIntegration) ...[
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
 
             // Steam ID
             AppFormField(
@@ -184,7 +148,7 @@ class LandingPage extends ConsumerWidget {
               },
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
 
             // Steam API Key
             AppFormField(
@@ -234,7 +198,8 @@ class LandingPage extends ConsumerWidget {
       isOutlined: true,
       onPressed: () {
         formNotifier.setDemoMode();
-        _createUser(context, ref, formNotifier.state, formNotifier);
+        final currentState = ref.read(landingPageFormProvider);
+        _createUser(context, ref, currentState, formNotifier);
       },
     );
   }
@@ -305,11 +270,6 @@ class SessionCreationPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final currentUser = ref.watch(currentUserProvider);
 
-    // Debug: Print current user state
-    print(
-      'SessionCreationPage - Current user: ${currentUser?.displayName ?? 'null'}',
-    );
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Create Session'),
@@ -370,7 +330,7 @@ class SessionCreationPage extends ConsumerWidget {
               ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
 
             // Create session card
             AppCard(
@@ -392,7 +352,7 @@ class SessionCreationPage extends ConsumerWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 12),
                   Text(
                     'Create a session and invite friends to swipe on games together.',
                     style: Theme.of(
@@ -415,7 +375,7 @@ class SessionCreationPage extends ConsumerWidget {
               ),
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
 
             // Join session card
             AppCard(
@@ -437,7 +397,7 @@ class SessionCreationPage extends ConsumerWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 12),
                   Text(
                     'Enter a session code to join friends who already started a session.',
                     style: Theme.of(
