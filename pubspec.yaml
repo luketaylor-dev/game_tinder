@@ -38,6 +38,9 @@ dependencies:
   # Riverpod for state management
   flutter_riverpod: ^2.5.1
 
+  # HTTP client for session management
+  http: ^1.1.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
