@@ -68,7 +68,7 @@ class SteamApiService {
         displayName: displayName.isNotEmpty
             ? displayName
             : playerData['personaname'] ?? 'Steam User',
-        avatarUrl: playerData['avatar'] ?? 'https://via.placeholder.com/64',
+        avatarUrl: playerData['avatar'] ?? '', // Empty string instead of placeholder
         ownedGameIds: ownedGameIds,
         gamePlaytimes: gamePlaytimes,
         steamId: steamId, // Private field, not sent to server

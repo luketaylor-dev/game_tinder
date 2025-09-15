@@ -174,6 +174,11 @@ class SessionNotifier extends StateNotifier<SessionState> {
   void setCurrentUser(GameTinderUser user) {
     state = state.copyWith(currentUser: user);
   }
+
+  /// Clear current user (for navigation back to setup)
+  void clearCurrentUser() {
+    state = state.copyWith(currentUser: null);
+  }
 }
 
 /// Provider for session management

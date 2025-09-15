@@ -54,7 +54,7 @@ class MockSteamService {
     return GameTinderUser(
       id: DateTime.now().millisecondsSinceEpoch.toString(), // Our internal ID
       displayName: displayName,
-      avatarUrl: 'https://via.placeholder.com/64',
+        avatarUrl: '', // Empty string instead of placeholder URL
       ownedGameIds: ['730', '570', '1172470', '271590'],
       gamePlaytimes: {'730': 1200, '570': 300, '1172470': 60, '271590': 2400},
       steamId: '76561198000000000', // Private field, not sent to server

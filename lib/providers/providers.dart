@@ -3,3 +3,4 @@ export 'counter_provider.dart';
 export 'session_provider.dart';
 export 'session_data_provider.dart';
 export 'mock_steam_provider.dart';
+export 'landing_page_form_provider.dart';
