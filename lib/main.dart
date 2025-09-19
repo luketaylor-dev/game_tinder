@@ -1,9 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:logger/logger.dart';
+import 'config/supabase_config.dart';
+import 'config/environment_config.dart';
 import 'theme/game_tinder_theme.dart';
 import 'screens/landing_page.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Load environment variables
+  try {
+    await EnvironmentConfig.load();
+    Logger().i('Environment variables loaded successfully');
+  } catch (e) {
+    Logger().e('Failed to load environment variables: $e');
+  }
+
+  // Initialize Supabase
+  try {
+    await SupabaseConfig.initialize();
+    Logger().i('Supabase initialized successfully');
+  } catch (e) {
+    Logger().e('Failed to initialize Supabase: $e');
+  }
+
   runApp(const ProviderScope(child: GameTinderApp()));
 }
 

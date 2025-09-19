@@ -35,8 +35,7 @@ class SessionNotifier extends StateNotifier<SessionState> {
   SessionNotifier() : super(const SessionState());
 
   // Mock server URL (in production, this would be your temporary session server)
-  static const String _baseUrl =
-      'http://localhost:3000'; // Or use a free service like Railway/Render
+  // static const String _baseUrl = 'http://localhost:3000'; // Or use a free service like Railway/Render
 
   /// Create a new session
   Future<String?> createSession(
