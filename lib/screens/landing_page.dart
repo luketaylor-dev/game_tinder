@@ -397,10 +397,9 @@ class SessionCreationPage extends ConsumerWidget {
                     text: 'Create Session',
                     icon: Icons.add,
                     onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Session creation coming soon!'),
-                        ),
+                      showDialog(
+                        context: context,
+                        builder: (context) => const SessionCreationDialog(),
                       );
                     },
                   ),
@@ -443,10 +442,9 @@ class SessionCreationPage extends ConsumerWidget {
                     icon: Icons.login,
                     isOutlined: true,
                     onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Session joining coming soon!'),
-                        ),
+                      showDialog(
+                        context: context,
+                        builder: (context) => const SessionJoinDialog(),
                       );
                     },
                   ),

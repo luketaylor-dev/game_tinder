@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:uuid/uuid.dart';
 import '../models/models.dart';
 
 /// Mock Steam API service for development
@@ -51,10 +52,11 @@ class MockSteamService {
 
   /// Generate mock user with games (privacy-focused)
   static GameTinderUser createMockUser(String displayName) {
+    const uuid = Uuid();
     return GameTinderUser(
-      id: DateTime.now().millisecondsSinceEpoch.toString(), // Our internal ID
+      id: uuid.v4(), // Generate proper UUID
       displayName: displayName,
-        avatarUrl: '', // Empty string instead of placeholder URL
+      avatarUrl: '', // Empty string instead of placeholder URL
       ownedGameIds: ['730', '570', '1172470', '271590'],
       gamePlaytimes: {'730': 1200, '570': 300, '1172470': 60, '271590': 2400},
       steamId: '76561198000000000', // Private field, not sent to server

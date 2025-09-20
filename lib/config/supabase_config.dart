@@ -13,5 +13,12 @@ class SupabaseConfig {
     );
   }
 
-  static SupabaseClient get client => Supabase.instance.client;
+  static SupabaseClient get client {
+    if (!Supabase.instance.isInitialized) {
+      throw StateError(
+        'Supabase is not initialized. Call SupabaseConfig.initialize() first.',
+      );
+    }
+    return Supabase.instance.client;
+  }
 }

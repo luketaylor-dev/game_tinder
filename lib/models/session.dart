@@ -94,4 +94,25 @@ class GameTinderSession {
 
     return gameSwipes.length == participants.length;
   }
+
+  /// Create a copy of this session with updated fields
+  GameTinderSession copyWith({
+    String? sessionId,
+    String? name,
+    List<GameTinderUser>? participants,
+    Map<String, SwipeAction>? swipes,
+    List<String>? matches,
+    DateTime? createdAt,
+    DateTime? expiresAt,
+  }) {
+    return GameTinderSession(
+      sessionId: sessionId ?? this.sessionId,
+      name: name ?? this.name,
+      participants: participants ?? this.participants,
+      swipes: swipes ?? this.swipes,
+      matches: matches ?? this.matches,
+      createdAt: createdAt ?? this.createdAt,
+      expiresAt: expiresAt ?? this.expiresAt,
+    );
+  }
 }

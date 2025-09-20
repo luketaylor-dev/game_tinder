@@ -88,7 +88,6 @@ CREATE TABLE matches (
 );
 
 -- Create indexes for better performance
-CREATE INDEX idx_users_steam_id ON users(steam_id);
 CREATE INDEX idx_sessions_code ON sessions(session_code);
 CREATE INDEX idx_sessions_host ON sessions(host_user_id);
 CREATE INDEX idx_session_participants_session ON session_participants(session_id);

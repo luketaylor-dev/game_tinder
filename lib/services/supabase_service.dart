@@ -3,7 +3,15 @@ import '../config/supabase_config.dart';
 
 /// Service class for Supabase operations
 class SupabaseService {
-  static SupabaseClient get _client => SupabaseConfig.client;
+  static SupabaseClient get _client {
+    try {
+      return SupabaseConfig.client;
+    } catch (e) {
+      throw StateError(
+        'Supabase is not initialized. Please ensure the app has been properly started.',
+      );
+    }
+  }
 
   /// Get the current authenticated user
   static User? get currentUser => _client.auth.currentUser;

@@ -21,8 +21,15 @@ void main() async {
   try {
     await SupabaseConfig.initialize();
     Logger().i('Supabase initialized successfully');
+    Logger().i('Supabase URL: ${EnvironmentConfig.supabaseUrl}');
+    Logger().i(
+      'Supabase Key: ${EnvironmentConfig.supabaseAnonKey.substring(0, 20)}...',
+    );
   } catch (e) {
     Logger().e('Failed to initialize Supabase: $e');
+    Logger().e(
+      'Please check your .env file and ensure Supabase credentials are correct',
+    );
   }
 
   runApp(const ProviderScope(child: GameTinderApp()));
