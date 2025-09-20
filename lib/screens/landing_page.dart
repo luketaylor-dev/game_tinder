@@ -2,17 +2,37 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/providers.dart';
 import '../models/models.dart';
-import '../services/services.dart';
 import '../components/components.dart';
-import '../components/debug/steam_api_test_dialog.dart';
-import '../components/debug/quick_steam_test_widget.dart';
+import '../services/steam_auth_service.dart';
 
 /// Landing page for Game Tinder - user setup and session creation
-class LandingPage extends ConsumerWidget {
+class LandingPage extends ConsumerStatefulWidget {
   const LandingPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<LandingPage> createState() => _LandingPageState();
+}
+
+class _LandingPageState extends ConsumerState<LandingPage> {
+  bool _hasSteamId = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkSteamId();
+  }
+
+  Future<void> _checkSteamId() async {
+    final hasSteamId = await SteamAuthService.hasStoredSteamId();
+    if (mounted) {
+      setState(() {
+        _hasSteamId = hasSteamId;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final formState = ref.watch(landingPageFormProvider);
     final formNotifier = ref.read(landingPageFormProvider.notifier);
 
@@ -80,13 +100,8 @@ class LandingPage extends ConsumerWidget {
 
                   const SizedBox(height: 12),
 
-                  // Create User Button
+                  // Create User Button (only enabled if Steam ID is saved)
                   _buildCreateButton(context, ref, formState, formNotifier),
-
-                  const SizedBox(height: 12),
-
-                  // Demo Button
-                  _buildDemoButton(context, ref, formNotifier),
                 ],
               ),
             ),
@@ -101,87 +116,104 @@ class LandingPage extends ConsumerWidget {
     LandingPageFormState formState,
     LandingPageFormNotifier formNotifier,
   ) {
-    return AppCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Set Up Your Profile',
-            style: Theme.of(
-              context,
-            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+    return Column(
+      children: [
+        // Display Name Card
+        AppCard(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Display Name',
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 12),
+              AppFormField(
+                labelText: 'How should friends see you?',
+                hintText: 'Enter your display name',
+                prefixIcon: Icons.person,
+                initialValue: formState.displayName,
+                onChanged: formNotifier.updateDisplayName,
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Please enter a display name';
+                  }
+                  return null;
+                },
+              ),
+            ],
           ),
-          const SizedBox(height: 12),
+        ),
 
-          // Display Name
-          AppFormField(
-            labelText: 'Display Name',
-            hintText: 'How should friends see you?',
-            prefixIcon: Icons.person,
-            initialValue: formState.displayName,
-            onChanged: formNotifier.updateDisplayName,
-            validator: (value) {
-              if (value == null || value.trim().isEmpty) {
-                return 'Please enter a display name';
-              }
-              return null;
-            },
+        const SizedBox(height: 16),
+
+        // Steam Authentication Card
+        AppCard(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    Icons.games,
+                    color: Theme.of(context).colorScheme.primary,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Steam Account',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const Spacer(),
+                  if (_hasSteamId)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.green.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: Colors.green.withOpacity(0.3),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.check_circle,
+                            color: Colors.green,
+                            size: 16,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            'Connected',
+                            style: TextStyle(
+                              color: Colors.green,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              SteamAuthWidget(
+                onSteamIdSaved: () {
+                  _checkSteamId();
+                },
+              ),
+            ],
           ),
-
-          const SizedBox(height: 12),
-
-          // Steam Integration Toggle
-          SwitchListTile(
-            title: const Text('Connect Steam Library'),
-            subtitle: const Text('Automatically find games you own'),
-            value: formState.useSteamIntegration,
-            onChanged: formNotifier.toggleSteamIntegration,
-            secondary: const Icon(Icons.cloud_download),
-          ),
-
-          if (formState.useSteamIntegration) ...[
-            const SizedBox(height: 12),
-
-            // Steam ID
-            AppFormField(
-              labelText: 'Steam ID',
-              hintText: '76561198000000000',
-              prefixIcon: Icons.account_circle,
-              helperText:
-                  'Your Steam profile ID (found in your Steam profile URL)',
-              initialValue: formState.steamId,
-              onChanged: formNotifier.updateSteamId,
-              validator: (value) {
-                if (formState.useSteamIntegration &&
-                    (value == null || value.trim().isEmpty)) {
-                  return 'Please enter your Steam ID';
-                }
-                return null;
-              },
-            ),
-
-            const SizedBox(height: 12),
-
-            // Steam API Key
-            AppFormField(
-              labelText: 'Steam API Key',
-              hintText: 'Your Steam Web API key',
-              prefixIcon: Icons.key,
-              helperText: 'Get your API key from steamcommunity.com/dev/apikey',
-              obscureText: true,
-              initialValue: formState.steamApiKey,
-              onChanged: formNotifier.updateSteamApiKey,
-              validator: (value) {
-                if (formState.useSteamIntegration &&
-                    (value == null || value.trim().isEmpty)) {
-                  return 'Please enter your Steam API key';
-                }
-                return null;
-              },
-            ),
-          ],
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -191,27 +223,27 @@ class LandingPage extends ConsumerWidget {
     LandingPageFormState formState,
     LandingPageFormNotifier formNotifier,
   ) {
-    return AppButton(
-      text: 'Continue',
-      isLoading: formState.isLoading,
-      onPressed: formState.isLoading
-          ? null
-          : () => _createUser(context, ref, formState, formNotifier),
-    );
-  }
+    return FutureBuilder<bool>(
+      future: SteamAuthService.hasStoredSteamId(),
+      builder: (context, snapshot) {
+        final hasSteamId = snapshot.data ?? false;
+        final canContinue =
+            !formState.isLoading &&
+            formState.displayName.trim().isNotEmpty &&
+            hasSteamId;
 
-  Widget _buildDemoButton(
-    BuildContext context,
-    WidgetRef ref,
-    LandingPageFormNotifier formNotifier,
-  ) {
-    return AppButton(
-      text: 'Try Demo Mode',
-      isOutlined: true,
-      onPressed: () {
-        formNotifier.setDemoMode();
-        final currentState = ref.read(landingPageFormProvider);
-        _createUser(context, ref, currentState, formNotifier);
+        String buttonText = 'Continue';
+        if (!hasSteamId) {
+          buttonText = 'Save Steam ID to Continue';
+        }
+
+        return AppButton(
+          text: buttonText,
+          isLoading: formState.isLoading,
+          onPressed: canContinue
+              ? () => _createUser(context, ref, formState, formNotifier)
+              : null,
+        );
       },
     );
   }
@@ -228,12 +260,7 @@ class LandingPage extends ConsumerWidget {
       return;
     }
 
-    if (formState.useSteamIntegration &&
-        (formState.steamId.trim().isEmpty ||
-            formState.steamApiKey.trim().isEmpty)) {
-      formNotifier.setError('Please enter both Steam ID and API key');
-      return;
-    }
+    // Steam authentication is now handled by SteamAuthWidget
 
     formNotifier.setLoading(true);
     formNotifier.clearError();
@@ -241,36 +268,15 @@ class LandingPage extends ConsumerWidget {
     try {
       GameTinderUser user;
 
-      if (formState.useSteamIntegration &&
-          formState.steamId.isNotEmpty &&
-          formState.steamApiKey.isNotEmpty) {
-        // Create user with Steam integration
-        final steamResponse = await SteamApiService.fetchUserProfile(
-          steamId: formState.steamId.trim(),
-          steamApiKey: formState.steamApiKey.trim(),
-        );
-
-        if (steamResponse.success && steamResponse.data != null) {
-          // Convert Steam profile to GameTinderUser
-          user = GameTinderUser(
-            id: DateTime.now().millisecondsSinceEpoch.toString(),
-            displayName: formState.displayName.trim().isNotEmpty
-                ? formState.displayName.trim()
-                : steamResponse.data!.displayName,
-            avatarUrl: steamResponse.data!.avatarUrl ?? '',
-            ownedGameIds: [], // Will be populated separately
-            gamePlaytimes: {},
-            steamId: formState.steamId.trim(),
-            steamApiKey: formState.steamApiKey.trim(),
-          );
-        } else {
-          // Fallback to mock user
-          user = MockSteamService.createMockUser(formState.displayName.trim());
-        }
-      } else {
-        // Create user with mock data
-        user = MockSteamService.createMockUser(formState.displayName.trim());
+      // Get stored Steam ID
+      final steamId = await SteamAuthService.getStoredSteamId();
+      if (steamId == null) {
+        formNotifier.setError('Steam ID is required to continue');
+        return;
       }
+
+      // Create user with Steam ID
+      user = MockSteamService.createMockUser(formState.displayName.trim());
 
       // Set current user
       ref.read(sessionProvider.notifier).setCurrentUser(user);
