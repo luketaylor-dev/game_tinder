@@ -4,6 +4,8 @@ import '../providers/providers.dart';
 import '../models/models.dart';
 import '../services/services.dart';
 import '../components/components.dart';
+import '../components/debug/steam_api_test_dialog.dart';
+import '../components/debug/quick_steam_test_widget.dart';
 
 /// Landing page for Game Tinder - user setup and session creation
 class LandingPage extends ConsumerWidget {
@@ -18,6 +20,16 @@ class LandingPage extends ConsumerWidget {
     final isMobile = screenWidth < 600;
 
     return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          showDialog(
+            context: context,
+            builder: (context) => const SteamApiTestDialog(),
+          );
+        },
+        tooltip: 'Test Steam API',
+        child: const Icon(Icons.bug_report),
+      ),
       body: SafeArea(
         child: Center(
           child: ConstrainedBox(
@@ -233,13 +245,28 @@ class LandingPage extends ConsumerWidget {
           formState.steamId.isNotEmpty &&
           formState.steamApiKey.isNotEmpty) {
         // Create user with Steam integration
-        user =
-            await SteamApiService.fetchUserProfile(
-              steamId: formState.steamId.trim(),
-              steamApiKey: formState.steamApiKey.trim(),
-              displayName: formState.displayName.trim(),
-            ) ??
-            MockSteamService.createMockUser(formState.displayName.trim());
+        final steamResponse = await SteamApiService.fetchUserProfile(
+          steamId: formState.steamId.trim(),
+          steamApiKey: formState.steamApiKey.trim(),
+        );
+
+        if (steamResponse.success && steamResponse.data != null) {
+          // Convert Steam profile to GameTinderUser
+          user = GameTinderUser(
+            id: DateTime.now().millisecondsSinceEpoch.toString(),
+            displayName: formState.displayName.trim().isNotEmpty
+                ? formState.displayName.trim()
+                : steamResponse.data!.displayName,
+            avatarUrl: steamResponse.data!.avatarUrl ?? '',
+            ownedGameIds: [], // Will be populated separately
+            gamePlaytimes: {},
+            steamId: formState.steamId.trim(),
+            steamApiKey: formState.steamApiKey.trim(),
+          );
+        } else {
+          // Fallback to mock user
+          user = MockSteamService.createMockUser(formState.displayName.trim());
+        }
       } else {
         // Create user with mock data
         user = MockSteamService.createMockUser(formState.displayName.trim());
@@ -435,6 +462,42 @@ class SessionCreationPage extends ConsumerWidget {
                   Navigator.of(context).pop();
                 },
               ),
+            ),
+
+            // Steam API test buttons (always visible for testing)
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                AppButton(
+                  text: 'Test Steam API',
+                  icon: Icons.bug_report,
+                  isOutlined: true,
+                  width: 150,
+                  height: 48,
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) => const SteamApiTestDialog(),
+                    );
+                  },
+                ),
+                const SizedBox(width: 16),
+                AppButton(
+                  text: 'Quick Test',
+                  icon: Icons.speed,
+                  isOutlined: true,
+                  width: 150,
+                  height: 48,
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const QuickSteamTestWidget(),
+                      ),
+                    );
+                  },
+                ),
+              ],
             ),
           ],
         ),

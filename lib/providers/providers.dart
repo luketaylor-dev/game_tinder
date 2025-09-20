@@ -5,3 +5,4 @@ export 'session_provider.dart';
 export 'session_data_provider.dart';
 export 'mock_steam_provider.dart';
 export 'landing_page_form_provider.dart';
+export 'steam_provider.dart';
