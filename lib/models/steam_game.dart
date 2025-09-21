@@ -27,8 +27,8 @@ class SteamGame with _$SteamGame {
       appId: (json['appid'] as num?)?.toInt() ?? 0,
       name: json['name']?.toString() ?? 'Unknown Game',
       description: json['description']?.toString(),
-      imageUrl: json['imageUrl']?.toString(),
-      headerImageUrl: json['headerImageUrl']?.toString(),
+      imageUrl: _getVerticalCapsuleUrl(json['appid']),
+      headerImageUrl: _getHeaderImageUrl(json['appid']),
       genres:
           (json['genres'] as List<dynamic>?)
               ?.map((e) => e.toString())
@@ -54,6 +54,18 @@ class SteamGame with _$SteamGame {
             )
           : null,
     );
+  }
+
+  /// Get vertical capsule image URL (748x896) - better for mobile
+  static String? _getVerticalCapsuleUrl(dynamic appId) {
+    if (appId == null) return null;
+    return 'https://cdn.akamai.steamstatic.com/steam/apps/$appId/library_600x900_2x.jpg';
+  }
+
+  /// Get header image URL (460x215) - landscape header
+  static String? _getHeaderImageUrl(dynamic appId) {
+    if (appId == null) return null;
+    return 'https://cdn.akamai.steamstatic.com/steam/apps/$appId/header.jpg';
   }
 
   /// Check if a game is multiplayer based on content descriptors and other indicators

@@ -147,13 +147,20 @@ class SessionNotifier extends StateNotifier<SessionState> {
 
       final participants = participantsResponse.map((p) {
         final userData = p['users'] as Map<String, dynamic>;
-        return GameTinderUser(
-          id: userData['id'] ?? '',
-          displayName: userData['display_name'] ?? '',
-          avatarUrl: userData['avatar_url'] ?? '',
-          ownedGameIds: [], // Not stored in database
-          gamePlaytimes: {}, // Not stored in database
-        );
+        final userId = userData['id'] ?? '';
+
+        // Preserve Steam data for the current user
+        if (userId == user.id) {
+          return user; // Use the original user object with Steam data
+        } else {
+          return GameTinderUser(
+            id: userId,
+            displayName: userData['display_name'] ?? '',
+            avatarUrl: userData['avatar_url'] ?? '',
+            ownedGameIds: [], // Not stored in database
+            gamePlaytimes: {}, // Not stored in database
+          );
+        }
       }).toList();
 
       _logger.i(
@@ -246,15 +253,27 @@ class SessionNotifier extends StateNotifier<SessionState> {
 
       _logger.d('Participants response: $participantsResponse');
 
-      final participants = participantsResponse.map((p) {
+      final participants = participantsResponse.map<GameTinderUser>((p) {
         final userData = p['users'] as Map<String, dynamic>;
-        return GameTinderUser(
-          id: userData['id'] ?? '',
-          displayName: userData['display_name'] ?? '',
-          avatarUrl: userData['avatar_url'] ?? '',
-          ownedGameIds: [], // Not stored in database
-          gamePlaytimes: {}, // Not stored in database
-        );
+        final userId = userData['id'] ?? '';
+
+        // Preserve Steam data for the current user if they're in the session
+        final existingUser = state.currentSession?.participants
+            .where((user) => user.id == userId)
+            .firstOrNull;
+
+        // If this is the current user and they have Steam data, preserve it
+        if (existingUser?.steamId != null) {
+          return existingUser!;
+        } else {
+          return GameTinderUser(
+            id: userId,
+            displayName: userData['display_name'] ?? '',
+            avatarUrl: userData['avatar_url'] ?? '',
+            ownedGameIds: [], // Not stored in database
+            gamePlaytimes: {}, // Not stored in database
+          );
+        }
       }).toList();
 
       _logger.i(

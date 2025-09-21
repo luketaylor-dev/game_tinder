@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/providers.dart';
 import '../../models/models.dart';
 import '../../services/supabase_service.dart';
+import '../../screens/screens.dart';
 import '../buttons/app_button.dart';
 import '../cards/app_card.dart';
 import '../feedback/error_message.dart';
@@ -615,10 +616,9 @@ class SessionWaitingRoom extends ConsumerWidget {
                 width: double.infinity,
                 height: 56,
                 onPressed: () {
-                  // TODO: Navigate to game swiping interface
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Game swiping interface coming next!'),
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => const GameSwipingScreen(),
                     ),
                   );
                 },

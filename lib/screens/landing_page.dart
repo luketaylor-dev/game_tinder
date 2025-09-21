@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:uuid/uuid.dart';
 import '../providers/providers.dart';
 import '../models/models.dart';
 import '../components/components.dart';
 import '../services/steam_auth_service.dart';
+import '../config/environment_config.dart';
 
 /// Landing page for Game Tinder - user setup and session creation
 class LandingPage extends ConsumerStatefulWidget {
@@ -276,7 +278,16 @@ class _LandingPageState extends ConsumerState<LandingPage> {
       }
 
       // Create user with Steam ID
-      user = MockSteamService.createMockUser(formState.displayName.trim());
+      user = GameTinderUser(
+        id: const Uuid().v4(),
+        displayName: formState.displayName.trim(),
+        avatarUrl: '', // No avatar for now
+        ownedGameIds: [], // Will be loaded from Steam API
+        gamePlaytimes: {}, // Will be loaded from Steam API
+        steamId: steamId, // Use the actual Steam ID
+        steamApiKey:
+            EnvironmentConfig.steamApiKey, // Use the API key from environment
+      );
 
       // Set current user
       ref.read(sessionProvider.notifier).setCurrentUser(user);

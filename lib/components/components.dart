@@ -10,3 +10,7 @@ export 'auth/steam_auth_widget.dart';
 export 'debug/steam_api_test_dialog.dart';
 export 'debug/quick_steam_test_widget.dart';
 export 'session/session_creation_dialog.dart';
+
+// Game components
+export 'games/game_card.dart';
+export 'games/swipeable_game_card.dart';
